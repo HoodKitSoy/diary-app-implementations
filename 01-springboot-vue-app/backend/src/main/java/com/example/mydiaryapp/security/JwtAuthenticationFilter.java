@@ -16,6 +16,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * HTTPリクエスト毎にJWTトークンを検証し、認証コンテキストを設定するフィルタです。
+ * AuthorizationヘッダーのBearerトークンをパースし、トークンが有効ならば
+ * Spring Securityのコンテキストに認証情報をセットします。
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -23,6 +28,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * リクエストヘッダーからJWTを抽出し、検証後にセキュリティコンテキストに認証情報をセットします。
+     * @param request HTTPリクエスト
+     * @param response HTTPレスポンス
+     * @param filterChain 次のフィルタ処理チェイン
+     * @throws ServletException フィルタ処理中の例外
+     * @throws IOException 入出力エラー
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, 
                                     HttpServletResponse response, 

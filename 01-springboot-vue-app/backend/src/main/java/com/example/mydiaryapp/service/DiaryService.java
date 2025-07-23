@@ -20,6 +20,10 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 日記に関わるビジネスロジックを提供するサービスクラスです。
+ * 日記の一覧取得、作成、詳細取得、更新、削除処理を担当します。
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,8 +33,19 @@ public class DiaryService {
     private final TagRepository tagRepository;
     private final ImageService imageService;
 
+    /**
+     * 指定ユーザーの日記一覧を取得します。
+     * キーワード検索、タグフィルタ、月フィルタおよびページネーションをサポートします。
+     * @param userId ユーザーID
+     * @param keyword 検索キーワード(タイトル・本文, 任意)
+     * @param tagName フィルタ用タグ名(任意)
+     * @param month フィルタ用年月(YYYY-MM形式, 任意)
+     * @param page ページ番号(1始まり)
+     * @param limit 1ページあたりの件数
+     * @return 日記リストとページ情報を含むMap
+     */
     public Map<String, Object> getDiaries(String userId, String keyword, String tagName, 
-                                         String month, int page, int limit) {
+                                          String month, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
         Page<Diary> diaryPage;
 
@@ -64,6 +79,13 @@ public class DiaryService {
         return response;
     }
 
+    /**
+     * 新規日記を作成します。
+     * タグの作成・関連付けおよび画像の保存処理を行います。
+     * @param userId ユーザーID
+     * @param request 日記情報(DiaryRequest)
+     * @return 作成した日記の詳細を含むMap
+     */
     public Map<String, Object> createDiary(String userId, DiaryRequest request) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
@@ -95,12 +117,26 @@ public class DiaryService {
         return convertToDetailMap(savedDiary);
     }
 
+    /**
+     * 指定IDの日記詳細を取得します。
+     * @param userId ユーザーID
+     * @param diaryId 日記ID
+     * @return 日記詳細を含むMap
+     */
     public Map<String, Object> getDiary(String userId, String diaryId) {
         Diary diary = diaryRepository.findByIdAndUserId(diaryId, userId)
             .orElseThrow(() -> new RuntimeException("日記が見つかりません"));
         return convertToDetailMap(diary);
     }
 
+    /**
+     * 指定IDの日記を更新します。
+     * タグと画像の更新処理を行い、変更を保存します。
+     * @param userId ユーザーID
+     * @param diaryId 日記ID
+     * @param request 更新用日記情報(DiaryRequest)
+     * @return 更新後の日記詳細を含むMap
+     */
     public Map<String, Object> updateDiary(String userId, String diaryId, DiaryRequest request) {
         Diary diary = diaryRepository.findByIdAndUserId(diaryId, userId)
             .orElseThrow(() -> new RuntimeException("日記が見つかりません"));
@@ -130,6 +166,11 @@ public class DiaryService {
         return convertToDetailMap(savedDiary);
     }
 
+    /**
+     * 指定IDの日記を削除します。
+     * @param userId ユーザーID
+     * @param diaryId 日記ID
+     */
     public void deleteDiary(String userId, String diaryId) {
         Diary diary = diaryRepository.findByIdAndUserId(diaryId, userId)
             .orElseThrow(() -> new RuntimeException("日記が見つかりません"));

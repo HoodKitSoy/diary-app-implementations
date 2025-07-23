@@ -26,14 +26,28 @@ import com.example.mydiaryapp.service.DiaryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 日記エントリの取得、作成、更新、削除を提供するコントローラークラスです。
+ * 認証済みユーザーの日記操作を担当します。
+ */
 @RestController
 @RequestMapping("/api/diaries")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class DiaryController {
     private final DiaryService diaryService;
-    private final UserRepository userRepository; // この行を追加
+    private final UserRepository userRepository;
 
+    /**
+     * ページネーション、検索クエリ、タグ、月フィルタを用いて日記リストを取得します。
+     * @param userDetails 認証済みのユーザー情報
+     * @param q 検索キーワード（オプション）
+     * @param tag 絞り込みタグ（オプション）
+     * @param month 絞り込み月（YYYY-MM形式、オプション）
+     * @param page ページ番号（デフォルト1）
+     * @param limit 1ページあたりの件数（デフォルト10）
+     * @return 日記リスト、総件数、ページ情報などを含むMapとHTTPステータス200(OK)
+     */
     @GetMapping
     public ResponseEntity<Map<String, Object>> getDiaries(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -48,6 +62,12 @@ public class DiaryController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 新規日記を作成します。
+     * @param userDetails 認証済みのユーザー情報
+     * @param request タイトル、本文、タグなどの日記情報
+     * @return 作成した日記の詳細を含むMapとHTTPステータス201(CREATED)
+     */
     @PostMapping
     public ResponseEntity<Map<String, Object>> createDiary(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -58,6 +78,12 @@ public class DiaryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * 指定IDの日記を取得します。
+     * @param userDetails 認証済みのユーザー情報
+     * @param diaryId 日記ID
+     * @return 日記の詳細を含むMapとHTTPステータス200(OK)
+     */
     @GetMapping("/{diaryId}")
     public ResponseEntity<Map<String, Object>> getDiary(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -68,6 +94,13 @@ public class DiaryController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 指定IDの日記を更新します。
+     * @param userDetails 認証済みのユーザー情報
+     * @param diaryId 更新対象の日記ID
+     * @param request 更新後のタイトル、本文、タグなどを含む日記情報
+     * @return 更新した日記の詳細を含むMapとHTTPステータス200(OK)
+     */
     @PutMapping("/{diaryId}")
     public ResponseEntity<Map<String, Object>> updateDiary(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -79,6 +112,12 @@ public class DiaryController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 指定IDの日記を削除します。
+     * @param userDetails 認証済みのユーザー情報
+     * @param diaryId 削除対象の日記ID
+     * @return HTTPステータス204(NO_CONTENT)
+     */
     @DeleteMapping("/{diaryId}")
     public ResponseEntity<Void> deleteDiary(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -89,6 +128,18 @@ public class DiaryController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * UserDetailsからユーザーIDを取得します。
+     * CustomUserDetailsの場合は直接取得し、Emailベースの場合はDB検索を行います。
+     * @param userDetails 認証済みのユーザー情報
+     * @return ユーザーID
+     */
+    /**
+     * UserDetailsからユーザーIDを取得します。
+     * CustomUserDetailsの場合は直接取得し、Emailベースの場合はDB検索を行います。
+     * @param userDetails 認証済みのユーザー情報
+     * @return ユーザーID
+     */
     private String getUserId(UserDetails userDetails) {
         if (userDetails instanceof CustomUserDetails) {
             return ((CustomUserDetails) userDetails).getUserId();

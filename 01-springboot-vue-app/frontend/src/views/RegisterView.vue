@@ -1,4 +1,5 @@
 <template>
+  <!-- RegisterView: 新規ユーザー登録フォームを提供するページコンポーネント -->
   <div class="auth-container">
     <div class="auth-card">
       <h1>新規登録</h1>
@@ -44,7 +45,9 @@
 </template>
 
 <script>
+// Vueのリアクティブ機能をインポート
 import { ref } from 'vue'
+// Vue Router と Pinia のユーザーストアをインポート
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 

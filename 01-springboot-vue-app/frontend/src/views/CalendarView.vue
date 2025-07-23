@@ -1,80 +1,89 @@
 <template>
+  <!-- カレンダー表示用のビューコンテナ -->
   <div class="calendar-view">
+    <!-- ナビゲーションバー -->
     <nav class="navbar">
       <div class="nav-brand">
+        <!-- アプリタイトルへのリンク -->
         <router-link to="/dashboard">My Diary App</router-link>
       </div>
       <div class="nav-links">
+        <!-- 各ページへのルーターリンク -->
         <router-link to="/dashboard" class="nav-link">ダッシュボード</router-link>
         <router-link to="/diaries" class="nav-link">日記一覧</router-link>
         <router-link to="/settings" class="nav-link">設定</router-link>
+        <!-- ログアウトボタン -->
         <button @click="handleLogout" class="btn btn-secondary">ログアウト</button>
       </div>
     </nav>
 
     <div class="container">
+      <!-- カレンダー操作ヘッダー -->
       <div class="calendar-header">
         <h1>カレンダー表示</h1>
         <div class="calendar-controls">
-          <button @click="previousMonth" class="btn btn-secondary">
-            ← 前月
-          </button>
+          <!-- 前月/次月切替ボタン -->
+          <button @click="previousMonth">‹</button>
           <h2>{{ formatMonth(currentDate) }}</h2>
-          <button @click="nextMonth" class="btn btn-secondary">
-            次月 →
-          </button>
+          <button @click="nextMonth">›</button>
         </div>
       </div>
 
+      <!-- カレンダー本体 -->
       <div class="calendar-container">
         <div class="calendar">
+          <!-- 曜日ヘッダー -->
           <div class="calendar-weekdays">
-            <div v-for="day in weekdays" :key="day" class="weekday">
-              {{ day }}
-            </div>
+            <div v-for="day in weekdays" :key="day" class="weekday">{{ day }}</div>
           </div>
-          
+          <!-- 日付セル -->
           <div class="calendar-days">
             <div
-              v-for="date in calendarDates"
-              :key="date.dateString"
+              v-for="dateObj in calendarDates"
+              :key="dateObj.date"
               :class="[
                 'calendar-day',
-                {
-                  'other-month': !date.isCurrentMonth,
-                  'has-diary': date.hasDiary,
-                  'today': date.isToday
-                }
+                { 'other-month': !dateObj.currentMonth },
+                { today: dateObj.isToday },
+                { 'has-diary': dateObj.hasDiary }
               ]"
             >
-              <div class="day-number">{{ date.day }}</div>
-              <div v-if="date.diary" class="day-content">
-                <router-link :to="`/diaries/${date.diary.diaryId}`" class="diary-link">
-                  <div class="diary-emotion" v-if="date.diary.emotion">
-                    {{ getEmotionIcon(date.diary.emotion) }}
-                  </div>
-                  <div class="diary-title">{{ truncateTitle(date.diary.title) }}</div>
-                </router-link>
-              </div>
-              <div v-else-if="date.isCurrentMonth" class="day-content">
+              <!-- 日付番号 -->
+              <div class="day-number">{{ dateObj.date.getDate() }}</div>
+              <!-- 日記ありの場合リンク表示 -->
+              <div class="day-content">
                 <router-link
-                  :to="`/diaries/new?date=${date.dateString}`"
-                  class="add-diary-link"
+                  v-if="dateObj.hasDiary"
+                  :to="`/diaries/${dateObj.diary.id}`"
+                  class="diary-link"
                 >
-                  +
+                  <div class="diary-emotion">{{ getEmotionIcon(dateObj.diary.emotion) }}</div>
+                  <div class="diary-title">{{ truncateTitle(dateObj.diary.title) }}</div>
+                </router-link>
+                <!-- 日記なしの場合新規作成リンク -->
+                <router-link
+                  v-else
+                  :to="`/diaries/new?date=${dateObj.date.toISOString()}`"
+                  class="add-diary-link"
+                >+
                 </router-link>
               </div>
             </div>
           </div>
-          </div>
+        </div>
       </div>
 
+      <!-- 感情の凡例表示 -->
       <div class="calendar-legend">
         <h3>感情の凡例</h3>
         <div class="emotion-legend">
-          <div v-for="emotion in emotions" :key="emotion.value" class="legend-item">
-            <span class="legend-icon">{{ emotion.icon }}</span>
-            <span class="legend-label">{{ emotion.label }}</span>
+          <div
+            v-for="emo in emotions"
+            :key="emo.value"
+            class="legend-item"
+          >
+            <span class="legend-icon">{{ emo.icon }}</span>
+            <span class="legend-label">{{ emo.label }}</span>
           </div>
         </div>
       </div>
@@ -83,6 +92,7 @@
 </template>
 
 <script>
+// Vue組み込みとルーター、Piniaストアをインポート
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
@@ -91,15 +101,20 @@ import { useDiaryStore } from '../stores/diary'
 export default {
   name: 'CalendarView',
   setup() {
+    // 各種フックとストアの初期化
     const router = useRouter()
     const userStore = useUserStore()
     const diaryStore = useDiaryStore()
-    
+
+    // 表示対象の基準日
     const currentDate = ref(new Date())
+    // 当月の日記データ配列
     const monthlyDiaries = ref([])
 
+    // 曜日ヘッダー用ラベル配列（日〜土）
     const weekdays = ['日', '月', '火', '水', '木', '金', '土']
-    
+
+    // 感情の種類とアイコン
     const emotions = [
       { value: 'happy', icon: '😊', label: 'うれしい' },
       { value: 'sad', icon: '😢', label: 'かなしい' },
@@ -109,6 +124,7 @@ export default {
       { value: 'neutral', icon: '😐', label: '普通' }
     ]
 
+    // カレンダーに表示する42日分の日付情報を算出
     const calendarDates = computed(() => {
       const year = currentDate.value.getFullYear()
       const month = currentDate.value.getMonth()
@@ -148,11 +164,13 @@ export default {
       return dates
     })
 
+    // ログアウト処理
     const handleLogout = () => {
       userStore.logout()
       router.push('/login')
     }
 
+    // 感情アイコン取得
     const getEmotionIcon = (emotion) => {
       const icons = {
         happy: '😊',
@@ -165,27 +183,37 @@ export default {
       return icons[emotion] || '😐'
     }
 
+    // 月表示テキスト生成
     const formatMonth = (date) => {
-      return date.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long'
-      })
+      return date.toLocaleDateString('ja-JP', { month: 'long' })
     }
 
+    // タイトルを短縮表示
     const truncateTitle = (title) => {
       return title.length > 10 ? title.substring(0, 10) + '...' : title
     }
 
+    // 前月ボタン
     const previousMonth = () => {
-      currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1)
+      currentDate.value = new Date(
+        currentDate.value.getFullYear(),
+        currentDate.value.getMonth() - 1,
+        1
+      )
       loadMonthlyDiaries()
     }
 
+    // 次月ボタン
     const nextMonth = () => {
-      currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1)
+      currentDate.value = new Date(
+        currentDate.value.getFullYear(),
+        currentDate.value.getMonth() + 1,
+        1
+      )
       loadMonthlyDiaries()
     }
 
+    // 当月の日記をAPIから読み込み
     const loadMonthlyDiaries = async () => {
       try {
         const year = currentDate.value.getFullYear()
@@ -202,6 +230,7 @@ export default {
       }
     }
 
+    // マウント時にデータ読み込み
     onMounted(() => {
       loadMonthlyDiaries()
     })

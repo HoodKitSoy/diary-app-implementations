@@ -1,10 +1,13 @@
-/* 追加のスタイル定義 */
+/* style.css: カスタムグローバルスタイル定義 */
+
+/* 感情セレクターのボタン配置 */
 .emotion-selector {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
 
+/* 感情ボタンのデフォルト/アクティブ状態 */
 .emotion-button {
   padding: 8px 12px;
   border: 2px solid #ddd;
@@ -19,6 +22,7 @@
   background-color: #e3f2fd;
 }
 
+/* タグ入力フィールドのスタイル */
 .tag-input {
   display: flex;
   flex-wrap: wrap;
@@ -45,6 +49,7 @@
   font-weight: bold;
 }
 
+/* 画像プレビューグリッド */
 .image-preview {
   display: flex;
   gap: 10px;
@@ -60,6 +65,7 @@
   border: 1px solid #ddd;
 }
 
+/* カレンダーグリッドレイアウト */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -83,6 +89,7 @@
   color: #ccc;
 }
 
+/* ページネーション */
 .pagination {
   display: flex;
   justify-content: center;

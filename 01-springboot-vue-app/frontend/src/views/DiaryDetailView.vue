@@ -1,4 +1,5 @@
 <template>
+<!-- DiaryDetailView: 日記詳細ページコンポーネント -->
   <div class="diary-detail-view">
     <nav class="navbar">
       <div class="nav-brand">
@@ -102,6 +103,7 @@
 </template>
 
 <script>
+// Vue組み込み関数とPiniaストアをインポート
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
@@ -110,28 +112,37 @@ import { useDiaryStore } from '../stores/diary'
 export default {
   name: 'DiaryDetailView',
   setup() {
+    // ルーターとユーザーストア、日記ストアの初期化
     const route = useRoute()
     const router = useRouter()
     const userStore = useUserStore()
     const diaryStore = useDiaryStore()
-    
+
+    // 削除確認モーダル表示フラグ
     const showDeleteModal = ref(false)
+    // 削除中フラグ
     const deleting = ref(false)
+    // 画像モーダル表示フラグ
     const showImageModal = ref(false)
+    // モーダルで表示する選択中の画像情報
     const selectedImage = ref(null)
 
+    // 現在表示する日記データの算出プロパティ
     const diary = computed(() => diaryStore.currentDiary)
 
+    // 日記本文を改行で分割し、段落ごとの配列に変換
     const formattedContent = computed(() => {
       if (!diary.value?.content) return []
       return diary.value.content.split('\n').filter(p => p.trim())
     })
 
+    // ユーザーログアウト処理
     const handleLogout = () => {
       userStore.logout()
       router.push('/login')
     }
 
+    // 感情に対応するアイコンを返すユーティリティ関数
     const getEmotionIcon = (emotion) => {
       const icons = {
         happy: '😊',
@@ -144,6 +155,7 @@ export default {
       return icons[emotion] || '😐'
     }
 
+    // 日付を日本語ロケールで整形
     const formatDate = (dateString) => {
       const date = new Date(dateString)
       return date.toLocaleDateString('ja-JP', {
@@ -153,19 +165,23 @@ export default {
       })
     }
 
+    // 日時を日本語ロケールで整形
     const formatDateTime = (dateString) => {
       const date = new Date(dateString)
       return date.toLocaleString('ja-JP')
     }
 
+    // 削除確認モーダルを開く
     const confirmDelete = () => {
       showDeleteModal.value = true
     }
 
+    // 削除確認モーダルを閉じる
     const closeDeleteModal = () => {
       showDeleteModal.value = false
     }
 
+    // 日記削除処理
     const deleteDiary = async () => {
       deleting.value = true
       try {
@@ -179,16 +195,19 @@ export default {
       }
     }
 
+    // 画像モーダルを開く
     const openImageModal = (image) => {
       selectedImage.value = image
       showImageModal.value = true
     }
 
+    // 画像モーダルを閉じる
     const closeImageModal = () => {
       showImageModal.value = false
       selectedImage.value = null
     }
 
+    // コンポーネントマウント時にAPIから日記データを取得
     onMounted(async () => {
       const diaryId = route.params.id
       try {

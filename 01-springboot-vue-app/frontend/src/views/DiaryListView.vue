@@ -1,4 +1,5 @@
 <template>
+  <!-- DiaryListView: 日記一覧ページを表示するコンポーネント -->
   <div class="diary-list-view">
     <nav class="navbar">
       <div class="nav-brand">
@@ -77,6 +78,7 @@
 </template>
 
 <script>
+// Vue組み込み関数、ルーター、Piniaストアをインポート
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
@@ -85,22 +87,28 @@ import { useDiaryStore } from '../stores/diary'
 export default {
   name: 'DiaryListView',
   setup() {
+    // ルーターとストアの初期化
     const router = useRouter()
     const userStore = useUserStore()
     const diaryStore = useDiaryStore()
-    
+
+    // 検索キーワードと選択タグのリアクティブ変数
     const searchKeyword = ref('')
     const selectedTag = ref('')
+    // 利用可能なタグ一覧
     const availableTags = ref([])
 
+    // 日記一覧とページネーションを算出プロパティから取得
     const diaries = computed(() => diaryStore.diaries)
     const pagination = computed(() => diaryStore.pagination)
 
+    // ログアウト処理
     const handleLogout = () => {
       userStore.logout()
       router.push('/login')
     }
 
+    // 感情に対応するアイコンを返すヘルパー関数
     const getEmotionIcon = (emotion) => {
       const icons = {
         happy: '😊',
@@ -113,11 +121,13 @@ export default {
       return icons[emotion] || '😐'
     }
 
+    // 日付を日本語ロケールで整形
     const formatDate = (dateString) => {
       const date = new Date(dateString)
       return date.toLocaleDateString('ja-JP')
     }
 
+    // APIから日記データを取得しタグ一覧を更新
     const loadDiaries = async (params = {}) => {
       try {
         await diaryStore.fetchDiaries({
@@ -139,6 +149,7 @@ export default {
       }
     }
 
+    // キーワード検索
     const searchDiaries = () => {
       const params = {}
       if (searchKeyword.value.trim()) {
@@ -147,6 +158,7 @@ export default {
       loadDiaries(params)
     }
 
+    // タグによるフィルタリング
     const filterByTag = () => {
       const params = {}
       if (selectedTag.value) {
@@ -155,6 +167,7 @@ export default {
       loadDiaries(params)
     }
 
+    // ページ切り替え
     const changePage = (page) => {
       const params = { page }
       if (searchKeyword.value.trim()) {
@@ -166,6 +179,7 @@ export default {
       loadDiaries(params)
     }
 
+    // マウント時に初期データをロード
     onMounted(() => {
       loadDiaries()
     })

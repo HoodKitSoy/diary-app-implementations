@@ -1,37 +1,50 @@
 <template>
+  <!-- DashboardView: ユーザーのダッシュボードを表示 -->
   <div class="dashboard">
+    <!-- ナビゲーションバー -->
     <nav class="navbar">
       <div class="nav-brand">
+        <!-- アプリ名ロゴ -->
         <h1>My Diary App</h1>
       </div>
       <div class="nav-links">
+        <!-- 日記一覧へのリンク -->
         <router-link to="/diaries" class="nav-link">日記一覧</router-link>
+        <!-- カレンダーへのリンク -->
         <router-link to="/calendar" class="nav-link">カレンダー</router-link>
+        <!-- 設定ページへのリンク -->
         <router-link to="/settings" class="nav-link">設定</router-link>
+        <!-- ログアウトボタン -->
         <button @click="handleLogout" class="btn btn-secondary">ログアウト</button>
       </div>
     </nav>
 
+    <!-- メインコンテンツエリア -->
     <div class="container">
       <div class="dashboard-content">
+        <!-- ウェルカムセクション -->
         <div class="welcome-section">
           <h2>こんにちは、{{ userStore.user?.username || 'ユーザー' }}さん</h2>
           <p>今日はどんな一日でしたか？</p>
         </div>
 
+        <!-- クイックアクションカード -->
         <div class="quick-actions">
+          <!-- 新規日記作成カード -->
           <router-link to="/diaries/new" class="action-card">
             <div class="action-icon">✏️</div>
             <h3>新しい日記を書く</h3>
             <p>今日の出来事を記録しましょう</p>
           </router-link>
 
+          <!-- 過去日記閲覧カード -->
           <router-link to="/diaries" class="action-card">
             <div class="action-icon">📚</div>
             <h3>過去の日記を見る</h3>
             <p>これまでの記録を振り返りましょう</p>
           </router-link>
 
+          <!-- カレンダービューカード -->
           <router-link to="/calendar" class="action-card">
             <div class="action-icon">📅</div>
             <h3>カレンダー表示</h3>
@@ -39,12 +52,15 @@
           </router-link>
         </div>
 
+        <!-- 最近の日記リスト -->
         <div class="recent-diaries" v-if="recentDiaries.length > 0">
           <h3>最近の日記</h3>
           <div class="diary-list">
             <div v-for="diary in recentDiaries" :key="diary.diaryId" class="diary-item">
               <router-link :to="`/diaries/${diary.diaryId}`" class="diary-link">
+                <!-- 感情アイコン -->
                 <div class="diary-emotion" v-if="diary.emotion">{{ getEmotionIcon(diary.emotion) }}</div>
+                <!-- タイトルと日付 -->
                 <div class="diary-info">
                   <h4>{{ diary.title }}</h4>
                   <p class="diary-date">{{ formatDate(diary.createdAt) }}</p>
@@ -53,12 +69,14 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <script>
+// Vue組み込み関数、ルーター、Piniaストアをインポート
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
@@ -70,30 +88,30 @@ export default {
     const router = useRouter()
     const userStore = useUserStore()
     const diaryStore = useDiaryStore()
+    // 最近取得した日記一覧を保持
     const recentDiaries = ref([])
 
+    // ログアウト処理
     const handleLogout = () => {
       userStore.logout()
       router.push('/login')
     }
 
+    // 感情に応じたアイコンを返すユーティリティ関数
     const getEmotionIcon = (emotion) => {
       const icons = {
-        happy: '😊',
-        sad: '😢',
-        angry: '😠',
-        excited: '😆',
-        neutral: '😐',
-        tired: '😴'
+        happy: '😊', sad: '😢', angry: '😠', excited: '😆', neutral: '😐', tired: '😴'
       }
       return icons[emotion] || '😐'
     }
 
+    // 日付文字列を日本語ロケールで整形
     const formatDate = (dateString) => {
       const date = new Date(dateString)
       return date.toLocaleDateString('ja-JP')
     }
 
+    // 最近の5件の日記をAPIから読み込み
     const loadRecentDiaries = async () => {
       try {
         const result = await diaryStore.fetchDiaries({ limit: 5 })
@@ -103,17 +121,15 @@ export default {
       }
     }
 
+    // コンポーネントマウント時にユーザー初期化とデータロード
     onMounted(() => {
       userStore.initializeUser()
       loadRecentDiaries()
     })
 
     return {
-      userStore,
-      recentDiaries,
-      handleLogout,
-      getEmotionIcon,
-      formatDate
+      userStore, recentDiaries, handleLogout,
+      getEmotionIcon, formatDate
     }
   }
 }

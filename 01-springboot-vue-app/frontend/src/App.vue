@@ -1,10 +1,12 @@
 <template>
+  <!-- App.vue: アプリのルートコンポーネント。UI全体にダークテーマを適用可能 -->
   <div id="app" :class="{ 'dark-theme': isDarkTheme }">
     <router-view />
   </div>
 </template>
 
 <script>
+// Vue組み込み関数とユーザーストアをインポート
 import { computed } from 'vue'
 import { useUserStore } from './stores/user'
 
@@ -13,6 +15,7 @@ export default {
   setup() {
     const userStore = useUserStore()
     
+    // ストアのthemeプロパティがdarkの場合にダークテーマを適用
     const isDarkTheme = computed(() => userStore.theme === 'dark')
 
     return {

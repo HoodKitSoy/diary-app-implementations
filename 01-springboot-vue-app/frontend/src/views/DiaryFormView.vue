@@ -1,4 +1,5 @@
 <template>
+  <!-- DiaryFormView: 日記作成・編集ページコンポーネント -->
   <div class="diary-form-view">
     <nav class="navbar">
       <div class="nav-brand">
@@ -121,6 +122,7 @@
 </template>
 
 <script>
+// Vue組み込み関数、ルーター、Piniaストアをインポート
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
@@ -129,18 +131,14 @@ import { useDiaryStore } from '../stores/diary'
 export default {
   name: 'DiaryFormView',
   setup() {
+    // ルーターとストアの初期化
     const route = useRoute()
     const router = useRouter()
     const userStore = useUserStore()
     const diaryStore = useDiaryStore()
-    
-    const form = ref({
-      title: '',
-      content: '',
-      emotion: '',
-      tags: [],
-      images: []
-    })
+
+    // フォーム入力用リアクティブ変数
+    const form = ref({ title: '', content: '', emotion: '', tags: [], images: [] })
     
     const newTag = ref('')
     const error = ref('')
@@ -242,6 +240,7 @@ export default {
       }
     }
 
+    // 初期表示または編集用データの読み込み
     onMounted(() => {
       loadDiaryForEdit()
     })

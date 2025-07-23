@@ -11,10 +11,25 @@ import com.example.mydiaryapp.entity.Image;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 画像データの保存・処理を行うサービスクラスです。
+ * Base64形式の画像データを解析し、一意のファイル名を生成して
+ * ストレージに保存します。
+ */
 @Service
 @RequiredArgsConstructor
 public class ImageService {
 
+    /**
+     * Diaryエンティティに紐付く画像を保存します。
+     * Base64データからMIMEタイプと拡張子を抽出し、
+     * 一意のファイル名を生成してストレージに保存後、
+     * Imageエンティティを生成・返却します。
+     * @param diary 紐付けるDiaryエンティティ
+     * @param imageRequest 画像アップロード情報(DiaryRequest.ImageRequest)
+     * @return 保存済みのImageエンティティ（id未保存の場合も含む）
+     * @throws RuntimeException 保存処理に失敗した場合
+     */
     public Image saveImage(Diary diary, DiaryRequest.ImageRequest imageRequest) {
         // Base64データからファイル拡張子を取得
         String data = imageRequest.getData();
@@ -36,6 +51,11 @@ public class ImageService {
         return image;
     }
 
+    /**
+     * Data URL形式の文字列からMIMEタイプを抽出します。
+     * @param dataUrl Base64を含むデータURL文字列
+     * @return MIMEタイプ文字列（例: image/jpeg）
+     */
     private String extractMimeType(String dataUrl) {
         if (dataUrl.startsWith("data:")) {
             int commaIndex = dataUrl.indexOf(',');
@@ -52,6 +72,11 @@ public class ImageService {
         return "image/jpeg"; // デフォルト
     }
 
+    /**
+     * MIMEタイプに対応するファイル拡張子を返します。
+     * @param mimeType MIMEタイプ文字列
+     * @return ファイル拡張子 (例: .jpg)
+     */
     private String getExtensionFromMimeType(String mimeType) {
         switch (mimeType) {
             case "image/jpeg":
@@ -67,6 +92,13 @@ public class ImageService {
         }
     }
 
+    /**
+     * 画像のBase64データをストレージに保存し、アクセス用URLを生成します。
+     * @param dataUrl Base64を含むデータURL文字列
+     * @param filename 保存用の一意なファイル名
+     * @return 画像の公開URL
+     * @throws RuntimeException 無効なデータまたは保存失敗時
+     */
     private String saveImageToStorage(String dataUrl, String filename) {
         try {
             // data:image/jpeg;base64,<base64-data> から base64データ部分を抽出

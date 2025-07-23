@@ -1,4 +1,5 @@
 <template>
+  <!-- SettingsView: ユーザーの各種設定（プロフィール、テーマ、リマインダー、データ管理、アカウント管理）を行うページコンポーネント -->
   <div class="settings-view">
     <nav class="navbar">
       <div class="nav-brand">
@@ -185,6 +186,7 @@
 
 <script>
 import { ref, onMounted, computed } from 'vue'
+// Vue Router と Pinia のユーザーストアをインポート（ログアウトやユーザー情報取得に使用）
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
